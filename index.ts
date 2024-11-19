@@ -66,15 +66,15 @@ async function deployScript() {
     ).value;
 
     if (csrfResponse.status !== 200) {
-        console.error(
+        console.log(
             colors.red("❌ Failed to get CSRF token from ZaneOps API ❌")
         );
-        console.error(
+        console.log(
             "Received status code from zaneops API : ",
             colors.red(csrfResponse.status)
         );
 
-        console.error("Received response from zaneops API : ");
+        console.log("Received response from zaneops API : ");
         console.dir(await parseResponseBody(csrfResponse));
         process.exit(1);
     } else {
@@ -93,16 +93,14 @@ async function deployScript() {
     });
 
     if (authResponse.status !== 201) {
-        console.error(
-            colors.red("❌ Failed to authenticate to ZaneOps API ❌")
-        );
-        console.error(
+        console.log(colors.red("❌ Failed to authenticate to ZaneOps API ❌"));
+        console.log(
             `Received status code from zaneops API : ${colors.red(
                 authResponse.status
             )}`
         );
 
-        console.error("Received response from zaneops API : ");
+        console.log("Received response from zaneops API : ");
         console.dir(await parseResponseBody(authResponse));
         process.exit(1);
     } else {
@@ -144,17 +142,17 @@ async function deployScript() {
     );
 
     if (requestChangeResponse.status !== 200) {
-        console.error(
+        console.log(
             colors.red(
                 "❌ Failed to update the image of the service on ZaneOps API ❌"
             )
         );
-        console.error(
+        console.log(
             "Received status code from zaneops API : ",
             colors.red(requestChangeResponse.status)
         );
 
-        console.error("Received response from zaneops API : ");
+        console.log("Received response from zaneops API : ");
         console.dir(await parseResponseBody(requestChangeResponse));
         process.exit(1);
     } else {
@@ -194,8 +192,8 @@ async function deployScript() {
             )}`
         );
     } else {
-        console.error(colors.red("❌ Failed to queue deployment ❌"));
-        console.error(
+        console.log(colors.red("❌ Failed to queue deployment ❌"));
+        console.log(
             "Received status code from zaneops API : ",
             colors.red(deploymentResponse.status)
         );
@@ -205,7 +203,7 @@ async function deployScript() {
             "application/json"
                 ? await deploymentResponse.json()
                 : await deploymentResponse.text();
-        console.error("Received response from zaneops API : ");
+        console.log("Received response from zaneops API : ");
         console.dir(response);
         process.exit(1);
     }
