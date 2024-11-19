@@ -1,7 +1,24 @@
 import { createEnv } from "@t3-oss/env-core";
 import { z } from "zod";
+import * as cookie from "cookie-es";
 
 const slugRegex = /[-a-zA-Z0-9_]+/gm;
+const Colors = {
+    GREEN: "\x1b[92m",
+    BLUE: "\x1b[94m",
+    ORANGE: "\x1b[38;5;208m",
+    RED: "\x1b[91m",
+    GREY: "\x1b[90m",
+    ENDC: "\x1b[0m",
+} as const;
+
+const colors = {
+    green: (input: any) => `${Colors.GREEN}${input}${Colors.ENDC}`,
+    blue: (input: any) => `${Colors.BLUE}${input}${Colors.ENDC}`,
+    orange: (input: any) => `${Colors.ORANGE}${input}${Colors.ENDC}`,
+    red: (input: any) => `${Colors.RED}${input}${Colors.ENDC}`,
+    grey: (input: any) => `${Colors.GREY}${input}${Colors.ENDC}`,
+} as const;
 
 export const env = createEnv({
     server: {
@@ -17,25 +34,14 @@ export const env = createEnv({
             .url("Invalid URL for the dashboard base URL"),
         COMMIT_MESSAGE: z.string().optional(),
     },
-    runtimeEnv: process.env,
+    runtimeEnv: Bun.env,
     emptyStringAsUndefined: true,
 });
 
-/**
- * Get the value of a cookie with the given name.
- * @example
- *      getCookie('name');
- *      // => "value"
- * @param name
- * @returns
- */
-export function getCookie(name: string, cookie: string): string | null {
-    const value = `; ${cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) {
-        return parts.pop()?.split(";").shift() ?? null;
-    }
-    return null;
+async function parseResponseBody(response: Response) {
+    return response.headers.get("content-type") === "application/json"
+        ? await response.json()
+        : await response.text();
 }
 
 async function deployScript() {
@@ -49,13 +55,34 @@ async function deployScript() {
         `auto-deploy from commit ${process.env.COMMIT_SHA}`;
     const zaneDashboardBaseUrl = env.ZANE_DASHBOARD_BASE_URL;
 
-    const csrfRes = await fetch(`${zaneDashboardBaseUrl}/api/csrf`);
-    const csrfToken = getCookie(
-        "csrftoken",
-        csrfRes.headers.get("set-cookie")!
-    )!;
+    console.log(
+        `Getting the CSRF token on ZaneOps API at ${colors.blue(
+            zaneDashboardBaseUrl
+        )}...`
+    );
+    const csrfResponse = await fetch(`${zaneDashboardBaseUrl}/api/csrf`);
+    const csrfToken = cookie.parseSetCookie(
+        csrfResponse.headers.get("set-cookie") ?? ""
+    ).value;
 
-    const res = await fetch(`${zaneDashboardBaseUrl}/api/auth/login`, {
+    if (csrfResponse.status !== 200) {
+        console.error(
+            colors.red("❌ Failed to get CSRF token from ZaneOps API ❌")
+        );
+        console.error(
+            "Received status code from zaneops API : ",
+            colors.red(csrfResponse.status)
+        );
+
+        console.error("Received response from zaneops API : ");
+        console.dir(await parseResponseBody(csrfResponse));
+        process.exit(1);
+    } else {
+        console.log(`Got the CSRF token successfully ✅`);
+    }
+
+    console.log(`Authenticating to ZaneOps API...`);
+    const authResponse = await fetch(`${zaneDashboardBaseUrl}/api/auth/login`, {
         method: "POST",
         headers: {
             "x-csrftoken": csrfToken,
@@ -65,18 +92,47 @@ async function deployScript() {
         body: JSON.stringify({ username, password }),
     });
 
-    const sessionCookie = res.headers
-        .get("set-cookie")
-        ?.split(";")[5]!
-        .split(", ")[1]!;
+    if (authResponse.status !== 201) {
+        console.error(
+            colors.red("❌ Failed to authenticate to ZaneOps API ❌")
+        );
+        console.error(
+            `Received status code from zaneops API : ${colors.red(
+                authResponse.status
+            )}`
+        );
 
-    const serviceState = await fetch(
+        console.error("Received response from zaneops API : ");
+        console.dir(await parseResponseBody(authResponse));
+        process.exit(1);
+    } else {
+        console.log(`Successfully Authenticated to ZaneOps API ✅`);
+    }
+
+    const sessionIdCookieStr = cookie
+        .splitSetCookieString(authResponse.headers.get("set-cookie") ?? "")
+        .filter((cookieStr) => cookieStr.startsWith("sessionid"))[0];
+
+    const sessionId = cookie.parseSetCookie(sessionIdCookieStr).value;
+
+    const requestCookie = [
+        cookie.serialize("sessionid", sessionId),
+        cookie.serialize("csrftoken", csrfToken),
+        "",
+    ].join(";");
+
+    console.log(
+        `Updating the image for the service ${colors.orange(
+            serviceSlug
+        )} in the project ${colors.orange(projectSlug)}...`
+    );
+    const requestChangeResponse = await fetch(
         `${zaneDashboardBaseUrl}/api/projects/${projectSlug}/request-service-changes/docker/${serviceSlug}/`,
         {
             method: "put",
             headers: {
                 "x-csrftoken": csrfToken,
-                cookie: `csrftoken=${csrfToken};${sessionCookie}`,
+                cookie: requestCookie,
                 "content-type": "application/json",
             },
             body: JSON.stringify({
@@ -85,31 +141,74 @@ async function deployScript() {
                 field: "image",
             }),
         }
-    ).then((res) => res.json());
+    );
 
-    console.log({ serviceState });
+    if (requestChangeResponse.status !== 200) {
+        console.error(
+            colors.red(
+                "❌ Failed to update the image of the service on ZaneOps API ❌"
+            )
+        );
+        console.error(
+            "Received status code from zaneops API : ",
+            colors.red(requestChangeResponse.status)
+        );
 
-    const deployment = await fetch(
+        console.error("Received response from zaneops API : ");
+        console.dir(await parseResponseBody(requestChangeResponse));
+        process.exit(1);
+    } else {
+        console.log(
+            `Successfully Updated the image to ${colors.orange(
+                serviceImage
+            )} ✅`
+        );
+    }
+
+    console.log(
+        `Queuing a new deployment for the service ${colors.orange(
+            serviceSlug
+        )}...`
+    );
+    const deploymentResponse = await fetch(
         `${zaneDashboardBaseUrl}/api/projects/${projectSlug}/deploy-service/docker/${serviceSlug}/`,
         {
             method: "put",
             headers: {
                 "x-csrftoken": csrfToken,
-                cookie: `csrftoken=${csrfToken};${sessionCookie}`,
+                cookie: requestCookie,
                 "content-type": "application/json",
             },
             body: JSON.stringify({
                 commit_message: commitMessage,
             }),
         }
-    ).then((res) => res.json());
-
-    console.dir(
-        {
-            deployment,
-        },
-        { depth: null }
     );
+
+    if (deploymentResponse.status === 200) {
+        const deployment = await deploymentResponse.json();
+        console.log(`Deployment queued succesfully ✅`);
+        console.log(
+            `inspect here ➡️ ${colors.blue(
+                `${zaneDashboardBaseUrl}/project/${projectSlug}/services/docker/${serviceSlug}/deployments/${deployment.hash}`
+            )}`
+        );
+    } else {
+        console.error(colors.red("❌ Failed to queue deployment ❌"));
+        console.error(
+            "Received status code from zaneops API : ",
+            colors.red(deploymentResponse.status)
+        );
+
+        const response =
+            deploymentResponse.headers.get("content-type") ===
+            "application/json"
+                ? await deploymentResponse.json()
+                : await deploymentResponse.text();
+        console.error("Received response from zaneops API : ");
+        console.dir(response);
+        process.exit(1);
+    }
 }
 
-deployScript();
+await deployScript();
