@@ -1,0 +1,36 @@
+name: "Auto-deploy to Zaneops"
+author: Fredkiss3
+description: "Deploy to zaneops automatically on git push"
+inputs:
+  zane_username:
+    description: "World"
+    required: true
+  zane_password:
+    description: "World"
+    required: true
+  zane_project_slug:
+    description: "World"
+    required: true
+  zane_service_slug:
+    description: "World"
+    required: true
+  service_image:
+    description: "World"
+    required: true
+  zane_dashboard_base_url:
+    description: "World"
+    required: true
+  commit_message:
+    description: "World"
+    required: false
+    default: Auto deploy from ${{ github.sha }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install bun
+      run: install-bun.sh
+      shell: bash
+    - name: Run deploy script
+      run: run-action.sh
+      shell: bash

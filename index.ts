@@ -1,6 +1,8 @@
 import { createEnv } from "@t3-oss/env-core";
 import { z } from "zod";
 import * as cookie from "cookie-es";
+import core from "@actions/core";
+import github from "@actions/github";
 
 const slugRegex = /[-a-zA-Z0-9_]+/gm;
 const Colors = {
@@ -70,8 +72,9 @@ async function deployScript() {
             colors.red("❌ Failed to get CSRF token from ZaneOps API ❌")
         );
         console.log(
-            "Received status code from zaneops API : ",
-            colors.red(csrfResponse.status)
+            `Received status code from zaneops API : ${colors.red(
+                csrfResponse.status
+            )}`
         );
 
         console.log("Received response from zaneops API : ");
@@ -148,8 +151,9 @@ async function deployScript() {
             )
         );
         console.log(
-            "Received status code from zaneops API : ",
-            colors.red(requestChangeResponse.status)
+            `Received status code from zaneops API : ${colors.red(
+                requestChangeResponse.status
+            )}`
         );
 
         console.log("Received response from zaneops API : ");
@@ -194,8 +198,9 @@ async function deployScript() {
     } else {
         console.log(colors.red("❌ Failed to queue deployment ❌"));
         console.log(
-            "Received status code from zaneops API : ",
-            colors.red(deploymentResponse.status)
+            `Received status code from zaneops API : ${colors.red(
+                deploymentResponse.status
+            )}`
         );
 
         const response =
