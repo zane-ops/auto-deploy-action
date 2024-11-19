@@ -1,5 +1,8 @@
 name: "Auto-deploy to Zaneops"
 author: Fredkiss3
+branding:
+  icon: play
+  color: blue
 description: "Deploy to zaneops automatically on git push"
 inputs:
   username:
