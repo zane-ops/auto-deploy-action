@@ -1,3 +1,26 @@
+import { createEnv } from "@t3-oss/env-core";
+import { z } from "zod";
+
+const slugRegex = /[-a-zA-Z0-9_]+/gm;
+
+export const env = createEnv({
+    server: {
+        ZANE_USERNAME: z.string().min(1, "The zaneops username is required"),
+        ZANE_PASSWORD: z.string().min(1, "The zaneops password is required"),
+        ZANE_PROJECT_SLUG: z.string().regex(slugRegex, "Invalid slug"),
+        ZANE_SERVICE_SLUG: z.string().regex(slugRegex, "Invalid slug"),
+        SERVICE_IMAGE: z
+            .string()
+            .min(1, "The image of your service is required"),
+        ZANE_DASHBOARD_BASE_URL: z
+            .string()
+            .url("Invalid URL for the dashboard base URL"),
+        COMMIT_MESSAGE: z.string().optional(),
+    },
+    runtimeEnv: process.env,
+    emptyStringAsUndefined: true,
+});
+
 /**
  * Get the value of a cookie with the given name.
  * @example
@@ -16,17 +39,23 @@ export function getCookie(name: string, cookie: string): string | null {
 }
 
 async function deployScript() {
-    const username = process.env.ZANE_USERNAME;
-    const password = process.env.ZANE_PASSWORD;
-    const zane_domain = process.env.ZANE_DOMAIN;
+    const username = env.ZANE_USERNAME;
+    const password = env.ZANE_PASSWORD;
+    const projectSlug = env.ZANE_PROJECT_SLUG;
+    const serviceSlug = env.ZANE_SERVICE_SLUG;
+    const serviceImage = env.SERVICE_IMAGE;
+    const commitMessage =
+        env.COMMIT_MESSAGE ??
+        `auto-deploy from commit ${process.env.COMMIT_SHA}`;
+    const zaneDashboardBaseUrl = env.ZANE_DASHBOARD_BASE_URL;
 
-    const csrfRes = await fetch("https://${zane_domain}/api/csrf");
+    const csrfRes = await fetch(`${zaneDashboardBaseUrl}/api/csrf`);
     const csrfToken = getCookie(
         "csrftoken",
         csrfRes.headers.get("set-cookie")!
     )!;
 
-    const res = await fetch("https://${zane_domain}/api/auth/login", {
+    const res = await fetch(`${zaneDashboardBaseUrl}/api/auth/login`, {
         method: "POST",
         headers: {
             "x-csrftoken": csrfToken,
@@ -42,7 +71,7 @@ async function deployScript() {
         .split(", ")[1]!;
 
     const serviceState = await fetch(
-        `https://${zane_domain}/api/projects/lazrak-chatbot/request-service-changes/docker/api/`,
+        `${zaneDashboardBaseUrl}/api/projects/${projectSlug}/request-service-changes/docker/${serviceSlug}/`,
         {
             method: "put",
             headers: {
@@ -52,7 +81,7 @@ async function deployScript() {
             },
             body: JSON.stringify({
                 type: "UPDATE",
-                new_value: `ghcr.io/mo-cherif/lazrak-chatbot-api:${process.env.COMMIT_SHA}`,
+                new_value: serviceImage,
                 field: "image",
             }),
         }
@@ -61,7 +90,7 @@ async function deployScript() {
     console.log({ serviceState });
 
     const deployment = await fetch(
-        `https://${zane_domain}/api/projects/lazrak-chatbot/deploy-service/docker/api/`,
+        `${zaneDashboardBaseUrl}/api/projects/${projectSlug}/deploy-service/docker/${serviceSlug}/`,
         {
             method: "put",
             headers: {
@@ -70,7 +99,7 @@ async function deployScript() {
                 "content-type": "application/json",
             },
             body: JSON.stringify({
-                commit_message: `auto-deploy from commit ${process.env.COMMIT_SHA}`,
+                commit_message: commitMessage,
             }),
         }
     ).then((res) => res.json());
