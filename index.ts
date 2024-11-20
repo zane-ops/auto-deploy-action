@@ -73,7 +73,7 @@ async function deployScript() {
             serviceSlug: core.getInput("service-slug", {
                 trimWhitespace: true,
             }),
-            serviceImage: core.getInput("service-image", {
+            serviceImage: core.getInput("service-new-image", {
                 trimWhitespace: true,
             }),
             commitMessage: core.getInput("commit-message", {
