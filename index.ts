@@ -90,7 +90,7 @@ async function deployScript() {
             serviceImage,
             serviceSlug,
             zaneDashboardBaseUrl,
-            commitMessage = `auto-deploy from commit ${github.context.payload.comment}`,
+            commitMessage = `auto-deploy from commit ${github.context.sha}`,
         } = inputSchema.parse(input);
 
         console.log(
