@@ -35,20 +35,20 @@ jobs:
             id-token: write
         steps:
             - name: Checkout
-            uses: actions/checkout@v4
+              uses: actions/checkout@v4
             - name: Set up QEMU
-            uses: docker/setup-qemu-action@v2
+              uses: docker/setup-qemu-action@v2
             - name: Set up Docker Buildx
-            uses: docker/setup-buildx-action@v2
+              uses: docker/setup-buildx-action@v2
             - name: Log in to the Container registry
-            uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+              uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
                 with:
                     registry: ghcr.io
                     username: ${{ github.actor }}
                     password: ${{ secrets.CONTAINER_REGISTRY_PAT }}
             - name: Build and push
-            uses: docker/build-push-action@v3
-            with:
+              uses: docker/build-push-action@v3
+              with:
                 context: ./
                 file: ./
                 push: true
@@ -57,8 +57,8 @@ jobs:
                 cache-from: type=registry,ref=ghcr.io/zane-ops/docs:latest
                 cache-to: type=inline
             - name: Deploy to Zaneops
-            uses: zane-ops/auto-deploy-action@v1
-            with:
+              uses: zane-ops/auto-deploy-action@v1
+              with:
                 username: ${{ secrets.ZANE_USERNAME }}
                 password: ${{ secrets.ZANE_PASSWORD }}
                 project-slug: my-project
