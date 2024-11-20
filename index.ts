@@ -1,4 +1,3 @@
-import { createEnv } from "@t3-oss/env-core";
 import { z } from "zod";
 import * as cookie from "cookie-es";
 import core from "@actions/core";
@@ -21,24 +20,6 @@ const colors = {
     red: (input: any) => `${Colors.RED}${input}${Colors.ENDC}`,
     grey: (input: any) => `${Colors.GREY}${input}${Colors.ENDC}`,
 } as const;
-
-export const env = createEnv({
-    server: {
-        ZANE_USERNAME: z.string().min(1, "The zaneops username is required"),
-        ZANE_PASSWORD: z.string().min(1, "The zaneops password is required"),
-        ZANE_PROJECT_SLUG: z.string().regex(slugRegex, "Invalid slug"),
-        ZANE_SERVICE_SLUG: z.string().regex(slugRegex, "Invalid slug"),
-        SERVICE_IMAGE: z
-            .string()
-            .min(1, "The image of your service is required"),
-        ZANE_DASHBOARD_BASE_URL: z
-            .string()
-            .url("Invalid URL for the dashboard base URL"),
-        COMMIT_MESSAGE: z.string().optional(),
-    },
-    runtimeEnv: process.env,
-    emptyStringAsUndefined: true,
-});
 
 const inputSchema = z.object({
     username: z.string().min(1, "The zaneops username is required"),

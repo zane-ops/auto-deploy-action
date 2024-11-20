@@ -31629,18 +31629,13 @@ module.exports = parseParams
 /***/ }),
 
 /***/ 4632:
-/***/ ((__webpack_module__, __webpack_exports__, __nccwpck_require__) => {
+/***/ ((__webpack_module__, __unused_webpack___webpack_exports__, __nccwpck_require__) => {
 
 __nccwpck_require__.a(__webpack_module__, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
-/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
-/* harmony export */   _: () => (/* binding */ env)
-/* harmony export */ });
-/* harmony import */ var _t3_oss_env_core__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(5071);
-/* harmony import */ var zod__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(727);
-/* harmony import */ var cookie_es__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(68);
+/* harmony import */ var zod__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(727);
+/* harmony import */ var cookie_es__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(68);
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(624);
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(5728);
-
 
 
 
@@ -31661,31 +31656,14 @@ const colors = {
     red: (input) => `${Colors.RED}${input}${Colors.ENDC}`,
     grey: (input) => `${Colors.GREY}${input}${Colors.ENDC}`,
 };
-const env = (0,_t3_oss_env_core__WEBPACK_IMPORTED_MODULE_2__/* .createEnv */ .w)({
-    server: {
-        ZANE_USERNAME: zod__WEBPACK_IMPORTED_MODULE_3__.z.string().min(1, "The zaneops username is required"),
-        ZANE_PASSWORD: zod__WEBPACK_IMPORTED_MODULE_3__.z.string().min(1, "The zaneops password is required"),
-        ZANE_PROJECT_SLUG: zod__WEBPACK_IMPORTED_MODULE_3__.z.string().regex(slugRegex, "Invalid slug"),
-        ZANE_SERVICE_SLUG: zod__WEBPACK_IMPORTED_MODULE_3__.z.string().regex(slugRegex, "Invalid slug"),
-        SERVICE_IMAGE: zod__WEBPACK_IMPORTED_MODULE_3__.z
-            .string()
-            .min(1, "The image of your service is required"),
-        ZANE_DASHBOARD_BASE_URL: zod__WEBPACK_IMPORTED_MODULE_3__.z
-            .string()
-            .url("Invalid URL for the dashboard base URL"),
-        COMMIT_MESSAGE: zod__WEBPACK_IMPORTED_MODULE_3__.z.string().optional(),
-    },
-    runtimeEnv: process.env,
-    emptyStringAsUndefined: true,
-});
-const inputSchema = zod__WEBPACK_IMPORTED_MODULE_3__.z.object({
-    username: zod__WEBPACK_IMPORTED_MODULE_3__.z.string().min(1, "The zaneops username is required"),
-    password: zod__WEBPACK_IMPORTED_MODULE_3__.z.string().min(1, "The zaneops password is required"),
-    projectSlug: zod__WEBPACK_IMPORTED_MODULE_3__.z.string().regex(slugRegex, "Invalid slug"),
-    serviceSlug: zod__WEBPACK_IMPORTED_MODULE_3__.z.string().regex(slugRegex, "Invalid slug"),
-    serviceImage: zod__WEBPACK_IMPORTED_MODULE_3__.z.string().min(1, "The image of your service is required"),
-    commitMessage: zod__WEBPACK_IMPORTED_MODULE_3__.z.string().url("Invalid URL for the dashboard base URL"),
-    zaneDashboardBaseUrl: zod__WEBPACK_IMPORTED_MODULE_3__.z.string().optional(),
+const inputSchema = zod__WEBPACK_IMPORTED_MODULE_2__.z.object({
+    username: zod__WEBPACK_IMPORTED_MODULE_2__.z.string().min(1, "The zaneops username is required"),
+    password: zod__WEBPACK_IMPORTED_MODULE_2__.z.string().min(1, "The zaneops password is required"),
+    projectSlug: zod__WEBPACK_IMPORTED_MODULE_2__.z.string().regex(slugRegex, "Invalid slug"),
+    serviceSlug: zod__WEBPACK_IMPORTED_MODULE_2__.z.string().regex(slugRegex, "Invalid slug"),
+    serviceImage: zod__WEBPACK_IMPORTED_MODULE_2__.z.string().min(1, "The image of your service is required"),
+    commitMessage: zod__WEBPACK_IMPORTED_MODULE_2__.z.string().url("Invalid URL for the dashboard base URL"),
+    zaneDashboardBaseUrl: zod__WEBPACK_IMPORTED_MODULE_2__.z.string().optional(),
 });
 async function parseResponseBody(response) {
     return response.headers.get("content-type") === "application/json"
@@ -31707,7 +31685,7 @@ async function deployScript() {
             serviceSlug: _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("service-slug", {
                 trimWhitespace: true,
             }),
-            serviceImage: _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("service-image", {
+            serviceImage: _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("service-new-image", {
                 trimWhitespace: true,
             }),
             commitMessage: _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("commit-message", {
@@ -31717,10 +31695,10 @@ async function deployScript() {
                 trimWhitespace: true,
             }),
         };
-        const { username, password, projectSlug, serviceImage, serviceSlug, zaneDashboardBaseUrl, commitMessage = `auto-deploy from commit ${_actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.comment}`, } = inputSchema.parse(input);
+        const { username, password, projectSlug, serviceImage, serviceSlug, zaneDashboardBaseUrl, commitMessage = `auto-deploy from commit ${_actions_github__WEBPACK_IMPORTED_MODULE_1__.context.sha}`, } = inputSchema.parse(input);
         console.log(`Getting the CSRF token on ZaneOps API at ${colors.blue(zaneDashboardBaseUrl)}...`);
         const csrfResponse = await fetch(`${zaneDashboardBaseUrl}/api/csrf`);
-        const csrfToken = cookie_es__WEBPACK_IMPORTED_MODULE_4__/* .parseSetCookie */ .s_(csrfResponse.headers.get("set-cookie") ?? "").value;
+        const csrfToken = cookie_es__WEBPACK_IMPORTED_MODULE_3__/* .parseSetCookie */ .s_(csrfResponse.headers.get("set-cookie") ?? "").value;
         if (csrfResponse.status !== 200) {
             console.log(colors.red("❌ Failed to get CSRF token from ZaneOps API ❌"));
             console.log(`Received status code from zaneops API : ${colors.red(csrfResponse.status)}`);
@@ -31751,12 +31729,12 @@ async function deployScript() {
         else {
             console.log(`Successfully Authenticated to ZaneOps API ✅`);
         }
-        const sessionIdCookieStr = cookie_es__WEBPACK_IMPORTED_MODULE_4__/* .splitSetCookieString */ .U2(authResponse.headers.get("set-cookie") ?? "")
+        const sessionIdCookieStr = cookie_es__WEBPACK_IMPORTED_MODULE_3__/* .splitSetCookieString */ .U2(authResponse.headers.get("set-cookie") ?? "")
             .filter((cookieStr) => cookieStr.startsWith("sessionid"))[0];
-        const sessionId = cookie_es__WEBPACK_IMPORTED_MODULE_4__/* .parseSetCookie */ .s_(sessionIdCookieStr).value;
+        const sessionId = cookie_es__WEBPACK_IMPORTED_MODULE_3__/* .parseSetCookie */ .s_(sessionIdCookieStr).value;
         const requestCookie = [
-            cookie_es__WEBPACK_IMPORTED_MODULE_4__/* .serialize */ .lK("sessionid", sessionId),
-            cookie_es__WEBPACK_IMPORTED_MODULE_4__/* .serialize */ .lK("csrftoken", csrfToken),
+            cookie_es__WEBPACK_IMPORTED_MODULE_3__/* .serialize */ .lK("sessionid", sessionId),
+            cookie_es__WEBPACK_IMPORTED_MODULE_3__/* .serialize */ .lK("csrftoken", csrfToken),
             "",
         ].join(";");
         console.log(`Updating the image for the service ${colors.orange(serviceSlug)} in the project ${colors.orange(projectSlug)}...`);
@@ -31820,80 +31798,6 @@ await deployScript();
 
 __webpack_async_result__();
 } catch(e) { __webpack_async_result__(e); } }, 1);
-
-/***/ }),
-
-/***/ 5071:
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __nccwpck_require__) => {
-
-/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
-/* harmony export */   w: () => (/* binding */ createEnv)
-/* harmony export */ });
-/* harmony import */ var zod__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(727);
-
-
-function createEnv(opts) {
-    const runtimeEnv = opts.runtimeEnvStrict ?? opts.runtimeEnv ?? process.env;
-    const emptyStringAsUndefined = opts.emptyStringAsUndefined ?? false;
-    if (emptyStringAsUndefined) {
-        for (const [key, value] of Object.entries(runtimeEnv)){
-            if (value === "") {
-                delete runtimeEnv[key];
-            }
-        }
-    }
-    const skip = !!opts.skipValidation;
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    if (skip) return runtimeEnv;
-    const _client = typeof opts.client === "object" ? opts.client : {};
-    const _server = typeof opts.server === "object" ? opts.server : {};
-    const _shared = typeof opts.shared === "object" ? opts.shared : {};
-    const client = (0,zod__WEBPACK_IMPORTED_MODULE_0__/* .object */ .Ik)(_client);
-    const server = (0,zod__WEBPACK_IMPORTED_MODULE_0__/* .object */ .Ik)(_server);
-    const shared = (0,zod__WEBPACK_IMPORTED_MODULE_0__/* .object */ .Ik)(_shared);
-    const isServer = opts.isServer ?? (typeof window === "undefined" || "Deno" in window);
-    const allClient = client.merge(shared);
-    const allServer = server.merge(shared).merge(client);
-    const parsed = isServer ? allServer.safeParse(runtimeEnv) // on server we can validate all env vars
-     : allClient.safeParse(runtimeEnv); // on client we can only validate the ones that are exposed
-    const onValidationError = opts.onValidationError ?? ((error)=>{
-        console.error("❌ Invalid environment variables:", error.flatten().fieldErrors);
-        throw new Error("Invalid environment variables");
-    });
-    const onInvalidAccess = opts.onInvalidAccess ?? ((_variable)=>{
-        throw new Error("❌ Attempted to access a server-side environment variable on the client");
-    });
-    if (parsed.success === false) {
-        return onValidationError(parsed.error);
-    }
-    const isServerAccess = (prop)=>{
-        if (!opts.clientPrefix) return true;
-        return !prop.startsWith(opts.clientPrefix) && !(prop in shared.shape);
-    };
-    const isValidServerAccess = (prop)=>{
-        return isServer || !isServerAccess(prop);
-    };
-    const ignoreProp = (prop)=>{
-        return prop === "__esModule" || prop === "$$typeof";
-    };
-    const extendedObj = (opts.extends ?? []).reduce((acc, curr)=>{
-        return Object.assign(acc, curr);
-    }, {});
-    const fullObj = Object.assign(parsed.data, extendedObj);
-    const env = new Proxy(fullObj, {
-        get (target, prop) {
-            if (typeof prop !== "string") return undefined;
-            if (ignoreProp(prop)) return undefined;
-            if (!isValidServerAccess(prop)) return onInvalidAccess(prop);
-            return Reflect.get(target, prop);
-        }
-    });
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    return env;
-}
-
-
-
 
 /***/ }),
 
@@ -32176,10 +32080,9 @@ function splitSetCookieString(cookiesString) {
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __nccwpck_require__) => {
 
 /* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
-/* harmony export */   Ik: () => (/* binding */ objectType),
 /* harmony export */   z: () => (/* binding */ z)
 /* harmony export */ });
-/* unused harmony exports BRAND, DIRTY, EMPTY_PATH, INVALID, NEVER, OK, ParseStatus, Schema, ZodAny, ZodArray, ZodBigInt, ZodBoolean, ZodBranded, ZodCatch, ZodDate, ZodDefault, ZodDiscriminatedUnion, ZodEffects, ZodEnum, ZodError, ZodFirstPartyTypeKind, ZodFunction, ZodIntersection, ZodIssueCode, ZodLazy, ZodLiteral, ZodMap, ZodNaN, ZodNativeEnum, ZodNever, ZodNull, ZodNullable, ZodNumber, ZodObject, ZodOptional, ZodParsedType, ZodPipeline, ZodPromise, ZodReadonly, ZodRecord, ZodSchema, ZodSet, ZodString, ZodSymbol, ZodTransformer, ZodTuple, ZodType, ZodUndefined, ZodUnion, ZodUnknown, ZodVoid, addIssueToContext, any, array, bigint, boolean, coerce, custom, date, datetimeRegex, default, defaultErrorMap, discriminatedUnion, effect, enum, function, getErrorMap, getParsedType, instanceof, intersection, isAborted, isAsync, isDirty, isValid, late, lazy, literal, makeIssue, map, nan, nativeEnum, never, null, nullable, number, objectUtil, oboolean, onumber, optional, ostring, pipeline, preprocess, promise, quotelessJson, record, set, setErrorMap, strictObject, string, symbol, transformer, tuple, undefined, union, unknown, util, void */
+/* unused harmony exports BRAND, DIRTY, EMPTY_PATH, INVALID, NEVER, OK, ParseStatus, Schema, ZodAny, ZodArray, ZodBigInt, ZodBoolean, ZodBranded, ZodCatch, ZodDate, ZodDefault, ZodDiscriminatedUnion, ZodEffects, ZodEnum, ZodError, ZodFirstPartyTypeKind, ZodFunction, ZodIntersection, ZodIssueCode, ZodLazy, ZodLiteral, ZodMap, ZodNaN, ZodNativeEnum, ZodNever, ZodNull, ZodNullable, ZodNumber, ZodObject, ZodOptional, ZodParsedType, ZodPipeline, ZodPromise, ZodReadonly, ZodRecord, ZodSchema, ZodSet, ZodString, ZodSymbol, ZodTransformer, ZodTuple, ZodType, ZodUndefined, ZodUnion, ZodUnknown, ZodVoid, addIssueToContext, any, array, bigint, boolean, coerce, custom, date, datetimeRegex, default, defaultErrorMap, discriminatedUnion, effect, enum, function, getErrorMap, getParsedType, instanceof, intersection, isAborted, isAsync, isDirty, isValid, late, lazy, literal, makeIssue, map, nan, nativeEnum, never, null, nullable, number, object, objectUtil, oboolean, onumber, optional, ostring, pipeline, preprocess, promise, quotelessJson, record, set, setErrorMap, strictObject, string, symbol, transformer, tuple, undefined, union, unknown, util, void */
 var util;
 (function (util) {
     util.assertEqual = (val) => val;
@@ -36550,6 +36453,4 @@ var z = /*#__PURE__*/Object.freeze({
 /******/ // This entry module used 'module' so it can't be inlined
 /******/ var __webpack_exports__ = __nccwpck_require__(4632);
 /******/ __webpack_exports__ = await __webpack_exports__;
-/******/ var __webpack_exports__env = __webpack_exports__._;
-/******/ export { __webpack_exports__env as env };
 /******/ 
