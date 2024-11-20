@@ -27,8 +27,8 @@ const inputSchema = z.object({
     projectSlug: z.string().regex(slugRegex, "Invalid slug"),
     serviceSlug: z.string().regex(slugRegex, "Invalid slug"),
     serviceImage: z.string().min(1, "The image of your service is required"),
-    commitMessage: z.string().url("Invalid URL for the dashboard base URL"),
-    zaneDashboardBaseUrl: z.string().optional(),
+    zaneDashboardBaseUrl: z.string().url("Invalid URL for the dashboard base URL"),
+    commitMessage: z.string().optional(),
 });
 
 type Input = z.infer<typeof inputSchema>;
