@@ -24,7 +24,10 @@ inputs:
     description: "URL where the dashboard for zaneops is available"
     required: true
   commit-message:
-    description: "Optionnal commit message associated with the deployment"
+    description: "Optional commit message associated with the deployment"
+    required: false
+  extra-headers:
+    description: "Optional extra headers to pass to all the requests encoded as JSON"
     required: false
 
 runs:

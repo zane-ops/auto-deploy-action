@@ -31662,17 +31662,27 @@ const inputSchema = zod__WEBPACK_IMPORTED_MODULE_2__.z.object({
     projectSlug: zod__WEBPACK_IMPORTED_MODULE_2__.z.string().regex(slugRegex, "Invalid slug"),
     serviceSlug: zod__WEBPACK_IMPORTED_MODULE_2__.z.string().regex(slugRegex, "Invalid slug"),
     serviceImage: zod__WEBPACK_IMPORTED_MODULE_2__.z.string().min(1, "The image of your service is required"),
-    zaneDashboardBaseUrl: zod__WEBPACK_IMPORTED_MODULE_2__.z.string().url("Invalid URL for the dashboard base URL"),
+    zaneDashboardBaseUrl: zod__WEBPACK_IMPORTED_MODULE_2__.z
+        .string()
+        .url("Invalid URL for the dashboard base URL"),
     commitMessage: zod__WEBPACK_IMPORTED_MODULE_2__.z.string().optional(),
+    extraHeaders: (0,zod__WEBPACK_IMPORTED_MODULE_2__/* .preprocess */ .vk)((arg) => {
+        try {
+            return JSON.parse(arg);
+        }
+        catch {
+            return {};
+        }
+    }, zod__WEBPACK_IMPORTED_MODULE_2__.z.record(zod__WEBPACK_IMPORTED_MODULE_2__.z.string(), zod__WEBPACK_IMPORTED_MODULE_2__.z.string()).optional().default({})),
 });
 async function parseResponseBody(response) {
     return response.headers.get("content-type") === "application/json"
         ? await response.json()
         : await response.text();
 }
-async function deployScript() {
-    try {
-        const input = {
+function getInput() {
+    if (process.env.CI === "true") {
+        return {
             username: _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("username", {
                 trimWhitespace: true,
             }),
@@ -31694,8 +31704,25 @@ async function deployScript() {
             zaneDashboardBaseUrl: _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("base-url", {
                 trimWhitespace: true,
             }),
+            extraHeaders: _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("extra-headers", {
+                trimWhitespace: true,
+            }),
         };
-        const { username, password, projectSlug, serviceImage, serviceSlug, zaneDashboardBaseUrl, commitMessage = `auto-deploy from commit ${_actions_github__WEBPACK_IMPORTED_MODULE_1__.context.sha}`, } = inputSchema.parse(input);
+    }
+    return {
+        username: process.env.ZANE_USERNAME,
+        password: process.env.ZANE_PASSWORD,
+        projectSlug: process.env.ZANE_PROJECT_SLUG,
+        serviceSlug: process.env.ZANE_SERVICE_SLUG,
+        serviceImage: process.env.SERVICE_IMAGE,
+        commitMessage: process.env.COMMIT_MESSAGE,
+        zaneDashboardBaseUrl: process.env.ZANE_DASHBOARD_BASE_URL,
+        extraHeaders: process.env.EXTRA_HEADERS,
+    };
+}
+async function deployScript() {
+    try {
+        const { username, password, projectSlug, serviceImage, serviceSlug, zaneDashboardBaseUrl, commitMessage = `auto-deploy from commit ${_actions_github__WEBPACK_IMPORTED_MODULE_1__.context.sha}`, extraHeaders, } = inputSchema.parse(getInput());
         console.log(`Getting the CSRF token on ZaneOps API at ${colors.blue(zaneDashboardBaseUrl)}...`);
         const csrfResponse = await fetch(`${zaneDashboardBaseUrl}/api/csrf`);
         const csrfToken = cookie_es__WEBPACK_IMPORTED_MODULE_3__/* .parseSetCookie */ .s_(csrfResponse.headers.get("set-cookie") ?? "").value;
@@ -31716,6 +31743,7 @@ async function deployScript() {
                 "x-csrftoken": csrfToken,
                 cookie: `csrftoken=${csrfToken}`,
                 "content-type": "application/json",
+                ...extraHeaders,
             },
             body: JSON.stringify({ username, password }),
         });
@@ -31744,6 +31772,7 @@ async function deployScript() {
                 "x-csrftoken": csrfToken,
                 cookie: requestCookie,
                 "content-type": "application/json",
+                ...extraHeaders,
             },
             body: JSON.stringify({
                 type: "UPDATE",
@@ -31768,6 +31797,7 @@ async function deployScript() {
                 "x-csrftoken": csrfToken,
                 cookie: requestCookie,
                 "content-type": "application/json",
+                ...extraHeaders,
             },
             body: JSON.stringify({
                 commit_message: commitMessage,
@@ -31781,8 +31811,7 @@ async function deployScript() {
         else {
             console.log(colors.red("❌ Failed to queue deployment ❌"));
             console.log(`Received status code from zaneops API : ${colors.red(deploymentResponse.status)}`);
-            const response = deploymentResponse.headers.get("content-type") ===
-                "application/json"
+            const response = deploymentResponse.headers.get("content-type") === "application/json"
                 ? await deploymentResponse.json()
                 : await deploymentResponse.text();
             console.log("Received response from zaneops API : ");
@@ -32080,9 +32109,10 @@ function splitSetCookieString(cookiesString) {
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __nccwpck_require__) => {
 
 /* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   vk: () => (/* binding */ preprocessType),
 /* harmony export */   z: () => (/* binding */ z)
 /* harmony export */ });
-/* unused harmony exports BRAND, DIRTY, EMPTY_PATH, INVALID, NEVER, OK, ParseStatus, Schema, ZodAny, ZodArray, ZodBigInt, ZodBoolean, ZodBranded, ZodCatch, ZodDate, ZodDefault, ZodDiscriminatedUnion, ZodEffects, ZodEnum, ZodError, ZodFirstPartyTypeKind, ZodFunction, ZodIntersection, ZodIssueCode, ZodLazy, ZodLiteral, ZodMap, ZodNaN, ZodNativeEnum, ZodNever, ZodNull, ZodNullable, ZodNumber, ZodObject, ZodOptional, ZodParsedType, ZodPipeline, ZodPromise, ZodReadonly, ZodRecord, ZodSchema, ZodSet, ZodString, ZodSymbol, ZodTransformer, ZodTuple, ZodType, ZodUndefined, ZodUnion, ZodUnknown, ZodVoid, addIssueToContext, any, array, bigint, boolean, coerce, custom, date, datetimeRegex, default, defaultErrorMap, discriminatedUnion, effect, enum, function, getErrorMap, getParsedType, instanceof, intersection, isAborted, isAsync, isDirty, isValid, late, lazy, literal, makeIssue, map, nan, nativeEnum, never, null, nullable, number, object, objectUtil, oboolean, onumber, optional, ostring, pipeline, preprocess, promise, quotelessJson, record, set, setErrorMap, strictObject, string, symbol, transformer, tuple, undefined, union, unknown, util, void */
+/* unused harmony exports BRAND, DIRTY, EMPTY_PATH, INVALID, NEVER, OK, ParseStatus, Schema, ZodAny, ZodArray, ZodBigInt, ZodBoolean, ZodBranded, ZodCatch, ZodDate, ZodDefault, ZodDiscriminatedUnion, ZodEffects, ZodEnum, ZodError, ZodFirstPartyTypeKind, ZodFunction, ZodIntersection, ZodIssueCode, ZodLazy, ZodLiteral, ZodMap, ZodNaN, ZodNativeEnum, ZodNever, ZodNull, ZodNullable, ZodNumber, ZodObject, ZodOptional, ZodParsedType, ZodPipeline, ZodPromise, ZodReadonly, ZodRecord, ZodSchema, ZodSet, ZodString, ZodSymbol, ZodTransformer, ZodTuple, ZodType, ZodUndefined, ZodUnion, ZodUnknown, ZodVoid, addIssueToContext, any, array, bigint, boolean, coerce, custom, date, datetimeRegex, default, defaultErrorMap, discriminatedUnion, effect, enum, function, getErrorMap, getParsedType, instanceof, intersection, isAborted, isAsync, isDirty, isValid, late, lazy, literal, makeIssue, map, nan, nativeEnum, never, null, nullable, number, object, objectUtil, oboolean, onumber, optional, ostring, pipeline, promise, quotelessJson, record, set, setErrorMap, strictObject, string, symbol, transformer, tuple, undefined, union, unknown, util, void */
 var util;
 (function (util) {
     util.assertEqual = (val) => val;

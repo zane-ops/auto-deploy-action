@@ -96,4 +96,8 @@ jobs:
 
 ### `commit-message`
  
-A custom commit message associated with the new deployment that will be created.
+An optional custom commit message associated with the new deployment that will be created.
+
+### `extra-headers`
+ 
+Optional extra headers to pass to all the requests encoded as JSON. ex: `{"Authorizaton": "Bearer ey2f4o3nl94k"}`.
