@@ -31724,7 +31724,9 @@ async function deployScript() {
     try {
         const { username, password, projectSlug, serviceImage, serviceSlug, zaneDashboardBaseUrl, commitMessage = `auto-deploy from commit ${_actions_github__WEBPACK_IMPORTED_MODULE_1__.context.sha}`, extraHeaders, } = inputSchema.parse(getInput());
         console.log(`Getting the CSRF token on ZaneOps API at ${colors.blue(zaneDashboardBaseUrl)}...`);
-        const csrfResponse = await fetch(`${zaneDashboardBaseUrl}/api/csrf`);
+        const csrfResponse = await fetch(`${zaneDashboardBaseUrl}/api/csrf`, {
+            headers: extraHeaders,
+        });
         const csrfToken = cookie_es__WEBPACK_IMPORTED_MODULE_3__/* .parseSetCookie */ .s_(csrfResponse.headers.get("set-cookie") ?? "").value;
         if (csrfResponse.status !== 200) {
             console.log(colors.red("❌ Failed to get CSRF token from ZaneOps API ❌"));
@@ -31732,6 +31734,7 @@ async function deployScript() {
             console.log("Received response from zaneops API : ");
             console.dir(await parseResponseBody(csrfResponse), { depth: null });
             _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed("Failure");
+            return;
         }
         else {
             console.log(`Got the CSRF token successfully ✅`);
@@ -31753,6 +31756,7 @@ async function deployScript() {
             console.log("Received response from zaneops API : ");
             console.dir(await parseResponseBody(authResponse), { depth: null });
             _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed("Failure");
+            return;
         }
         else {
             console.log(`Successfully Authenticated to ZaneOps API ✅`);
@@ -31788,6 +31792,7 @@ async function deployScript() {
                 depth: null,
             });
             _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed("Failure");
+            return;
         }
         else {
             console.log(`Successfully Updated the image to ${colors.orange(serviceImage)} ✅`);
@@ -31819,6 +31824,7 @@ async function deployScript() {
             console.log("Received response from zaneops API : ");
             console.dir(response);
             _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed("Failure");
+            return;
         }
     }
     catch (error) {

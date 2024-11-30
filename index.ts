@@ -107,7 +107,9 @@ async function deployScript() {
 				zaneDashboardBaseUrl,
 			)}...`,
 		);
-		const csrfResponse = await fetch(`${zaneDashboardBaseUrl}/api/csrf`);
+		const csrfResponse = await fetch(`${zaneDashboardBaseUrl}/api/csrf`, {
+			headers: extraHeaders,
+		});
 		const csrfToken = cookie.parseSetCookie(
 			csrfResponse.headers.get("set-cookie") ?? "",
 		).value;
@@ -125,6 +127,7 @@ async function deployScript() {
 			console.log("Received response from zaneops API : ");
 			console.dir(await parseResponseBody(csrfResponse), { depth: null });
 			core.setFailed("Failure");
+			return;
 		} else {
 			console.log(`Got the CSRF token successfully ✅`);
 		}
@@ -152,6 +155,7 @@ async function deployScript() {
 			console.log("Received response from zaneops API : ");
 			console.dir(await parseResponseBody(authResponse), { depth: null });
 			core.setFailed("Failure");
+			return;
 		} else {
 			console.log(`Successfully Authenticated to ZaneOps API ✅`);
 		}
@@ -208,6 +212,7 @@ async function deployScript() {
 				depth: null,
 			});
 			core.setFailed("Failure");
+			return;
 		} else {
 			console.log(
 				`Successfully Updated the image to ${colors.orange(serviceImage)} ✅`,
@@ -258,6 +263,7 @@ async function deployScript() {
 			console.log("Received response from zaneops API : ");
 			console.dir(response);
 			core.setFailed("Failure");
+			return;
 		}
 	} catch (error) {
 		core.setFailed((error as any).message);
