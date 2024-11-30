@@ -31730,7 +31730,7 @@ async function deployScript() {
             console.log(colors.red("❌ Failed to get CSRF token from ZaneOps API ❌"));
             console.log(`Received status code from zaneops API : ${colors.red(csrfResponse.status)}`);
             console.log("Received response from zaneops API : ");
-            console.dir(await parseResponseBody(csrfResponse));
+            console.dir(await parseResponseBody(csrfResponse), { depth: null });
             _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed("Failure");
         }
         else {
@@ -31751,7 +31751,7 @@ async function deployScript() {
             console.log(colors.red("❌ Failed to authenticate to ZaneOps API ❌"));
             console.log(`Received status code from zaneops API : ${colors.red(authResponse.status)}`);
             console.log("Received response from zaneops API : ");
-            console.dir(await parseResponseBody(authResponse));
+            console.dir(await parseResponseBody(authResponse), { depth: null });
             _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed("Failure");
         }
         else {
@@ -31784,7 +31784,9 @@ async function deployScript() {
             console.log(colors.red("❌ Failed to update the image of the service on ZaneOps API ❌"));
             console.log(`Received status code from zaneops API : ${colors.red(requestChangeResponse.status)}`);
             console.log("Received response from zaneops API : ");
-            console.dir(await parseResponseBody(requestChangeResponse));
+            console.dir(await parseResponseBody(requestChangeResponse), {
+                depth: null,
+            });
             _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed("Failure");
         }
         else {

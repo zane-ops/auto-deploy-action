@@ -123,7 +123,7 @@ async function deployScript() {
 			);
 
 			console.log("Received response from zaneops API : ");
-			console.dir(await parseResponseBody(csrfResponse));
+			console.dir(await parseResponseBody(csrfResponse), { depth: null });
 			core.setFailed("Failure");
 		} else {
 			console.log(`Got the CSRF token successfully ✅`);
@@ -150,7 +150,7 @@ async function deployScript() {
 			);
 
 			console.log("Received response from zaneops API : ");
-			console.dir(await parseResponseBody(authResponse));
+			console.dir(await parseResponseBody(authResponse), { depth: null });
 			core.setFailed("Failure");
 		} else {
 			console.log(`Successfully Authenticated to ZaneOps API ✅`);
@@ -204,7 +204,9 @@ async function deployScript() {
 			);
 
 			console.log("Received response from zaneops API : ");
-			console.dir(await parseResponseBody(requestChangeResponse));
+			console.dir(await parseResponseBody(requestChangeResponse), {
+				depth: null,
+			});
 			core.setFailed("Failure");
 		} else {
 			console.log(
