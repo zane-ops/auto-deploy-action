@@ -31727,7 +31727,9 @@ async function deployScript() {
         const csrfResponse = await fetch(`${zaneDashboardBaseUrl}/api/csrf`, {
             headers: extraHeaders,
         });
-        const csrfToken = cookie_es__WEBPACK_IMPORTED_MODULE_3__/* .parseSetCookie */ .s_(csrfResponse.headers.get("set-cookie") ?? "").value;
+        const csrfTokenStr = cookie_es__WEBPACK_IMPORTED_MODULE_3__/* .splitSetCookieString */ .U2(csrfResponse.headers.get("set-cookie") ?? "")
+            .filter((cookieStr) => cookieStr.startsWith("csrftoken"))[0];
+        const csrfToken = cookie_es__WEBPACK_IMPORTED_MODULE_3__/* .parseSetCookie */ .s_(csrfTokenStr).value;
         if (csrfResponse.status !== 200) {
             console.log(colors.red("❌ Failed to get CSRF token from ZaneOps API ❌"));
             console.log(`Received status code from zaneops API : ${colors.red(csrfResponse.status)}`);
@@ -31771,7 +31773,7 @@ async function deployScript() {
         ].join(";");
         console.log(`Updating the image for the service ${colors.orange(serviceSlug)} in the project ${colors.orange(projectSlug)}...`);
         const requestChangeResponse = await fetch(`${zaneDashboardBaseUrl}/api/projects/${projectSlug}/request-service-changes/docker/${serviceSlug}/`, {
-            method: "put",
+            method: "PUT",
             headers: {
                 "x-csrftoken": csrfToken,
                 cookie: requestCookie,
@@ -31799,7 +31801,7 @@ async function deployScript() {
         }
         console.log(`Queuing a new deployment for the service ${colors.orange(serviceSlug)}...`);
         const deploymentResponse = await fetch(`${zaneDashboardBaseUrl}/api/projects/${projectSlug}/deploy-service/docker/${serviceSlug}/`, {
-            method: "put",
+            method: "PUT",
             headers: {
                 "x-csrftoken": csrfToken,
                 cookie: requestCookie,

@@ -110,9 +110,10 @@ async function deployScript() {
 		const csrfResponse = await fetch(`${zaneDashboardBaseUrl}/api/csrf`, {
 			headers: extraHeaders,
 		});
-		const csrfToken = cookie.parseSetCookie(
-			csrfResponse.headers.get("set-cookie") ?? "",
-		).value;
+		const csrfTokenStr = cookie
+			.splitSetCookieString(csrfResponse.headers.get("set-cookie") ?? "")
+			.filter((cookieStr) => cookieStr.startsWith("csrftoken"))[0];
+		const csrfToken = cookie.parseSetCookie(csrfTokenStr).value;
 
 		if (csrfResponse.status !== 200) {
 			console.log(
@@ -180,7 +181,7 @@ async function deployScript() {
 		const requestChangeResponse = await fetch(
 			`${zaneDashboardBaseUrl}/api/projects/${projectSlug}/request-service-changes/docker/${serviceSlug}/`,
 			{
-				method: "put",
+				method: "PUT",
 				headers: {
 					"x-csrftoken": csrfToken,
 					cookie: requestCookie,
@@ -227,7 +228,7 @@ async function deployScript() {
 		const deploymentResponse = await fetch(
 			`${zaneDashboardBaseUrl}/api/projects/${projectSlug}/deploy-service/docker/${serviceSlug}/`,
 			{
-				method: "put",
+				method: "PUT",
 				headers: {
 					"x-csrftoken": csrfToken,
 					cookie: requestCookie,
