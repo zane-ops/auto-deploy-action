@@ -5,31 +5,33 @@ branding:
   color: blue
 description: "Deploy to zaneops automatically on git push"
 inputs:
-  username:
-    description: "Username on ZaneOps dashboard"
-    required: true
-  password:
-    description: "Password on ZaneOps dashboard"
-    required: true
-  project-slug:
-    description: "Slug of the project that contains the service to be deployed."
-    required: true
-  service-slug:
-    description: "Slug of the service to be deployed."
-    required: true
-  service-new-image:
+  SERVICE_IMAGE:
     description: "The new image of the service to deploy"
     required: true
-  base-url:
-    description: "URL where the dashboard for zaneops is available"
+  DEPLOY_WEBHOOK_URL:
+    description: "URL to deploy your service"
     required: true
-  commit-message:
+  COMMIT_MESSAGE:
     description: "Optional commit message associated with the deployment"
     required: false
-  extra-headers:
+  EXTRA_HEADERS:
     description: "Optional extra headers to pass to all the requests encoded as JSON"
     required: false
 
 runs:
-  using: "node20"
-  main: "dist/index.js"
+  using: "composite"
+  steps:
+    - uses: oven-sh/setup-bun@v2
+      with:
+        bun-version: latest
+
+    - name: Install packages and Deploy to zaneops
+      shell: bash
+      run: |
+        bun install --frozen-lockfile
+        bun run index.ts
+      env:
+        DEPLOY_WEBHOOK_URL: ${{ inputs.DEPLOY_WEBHOOK_URL }}
+        COMMIT_MESSAGE: ${{ input.COMMIT_MESSAGE }}
+        SERVICE_IMAGE: ${{ inputs.SERVICE_IMAGE }}
+        EXTRA_HEADERS: ${{ inputs.EXTRA_HEADERS }}
