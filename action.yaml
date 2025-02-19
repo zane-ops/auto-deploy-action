@@ -30,8 +30,8 @@ runs:
       run: |
         bun install --frozen-lockfile
         bun run index.ts
-      # env:
-      #   DEPLOY_WEBHOOK_URL: ${{ inputs.DEPLOY_WEBHOOK_URL }}
-      #   COMMIT_MESSAGE: ${{ input.COMMIT_MESSAGE }}
-      #   SERVICE_IMAGE: ${{ inputs.SERVICE_IMAGE }}
-      #   EXTRA_HEADERS: ${{ inputs.EXTRA_HEADERS }}
+      env:
+        DEPLOY_WEBHOOK_URL: ${{ inputs.DEPLOY_WEBHOOK_URL }}
+        COMMIT_MESSAGE: ${{ input.COMMIT_MESSAGE }}
+        SERVICE_IMAGE: ${{ inputs.SERVICE_IMAGE }}
+        EXTRA_HEADERS: ${{ inputs.EXTRA_HEADERS }}
