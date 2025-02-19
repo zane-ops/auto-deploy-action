@@ -21,6 +21,11 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - uses: actions/checkout@v4
+      with:
+        repository: "zane-ops/auto-deploy-action"
+        ref: "v4"
+
     - uses: oven-sh/setup-bun@v2
       with:
         bun-version: latest

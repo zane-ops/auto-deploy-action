@@ -50,7 +50,7 @@ jobs:
                 cache-from: type=registry,ref=ghcr.io/zane-ops/docs:latest
                 cache-to: type=inline
             - name: Deploy to Zaneops
-              uses: zane-ops/auto-deploy-action@v3
+              uses: zane-ops/auto-deploy-action@v4
               with:
                 SERVICE_IMAGE: ghcr.io/zane-ops/docs:${{ github.sha }}
                 DEPLOY_WEBHOOK_URL: ${{ secrets.DEPLOY_WEBHOOK_URL }}
