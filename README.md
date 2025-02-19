@@ -5,7 +5,7 @@ This action is used to deploy docker services automatically to a ZaneOps instanc
 ## Example usage
 
 ```yaml
-uses: zane-ops/auto-deploy-action@v2
+uses: zane-ops/auto-deploy-action@v4
 with:
   SERVICE_IMAGE: ghcr.io/fredkiss3:fredkiss-dev:${{ github.sha }}
   DEPLOY_WEBHOOK_URL: ${{ secrets.DEPLOY_WEBHOOK_URL }}
