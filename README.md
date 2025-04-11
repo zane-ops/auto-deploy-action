@@ -1,5 +1,23 @@
 # Auto-deploy to zaneops 
 
+> [!WARNING]
+> This Github action is deprecated and may not be compatible with newer ZaneOps versions, please use a simple `curl` instead like this
+> ```yaml
+> name: Deploy
+> on:
+>  push:
+>     branches: [main] # customize as needed
+> jobs:
+>  deploy-to-zaneops:
+>    name: Deploy app
+>    runs-on: ubuntu-latest
+>    steps:
+>        - name: Checkout
+>          uses: actions/checkout@v4
+>        - name: Deploy to ZaneOps
+>          run: curl -f -o /dev/null -X PUT "${{ secrets.DEPLOY_WEBHOOK_URL }}"
+> ```
+
 This action is used to deploy docker services automatically to a ZaneOps instance on git push.
 
 ## Example usage
